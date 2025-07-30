@@ -6,6 +6,7 @@ from bson import ObjectId
 from core.auth import create_access_token, verify_password
 
 
+
 async def create_user(user: UserCreate):
     # Check if user exists
     if await user_collection.find_one({"email": user.email}):
@@ -26,5 +27,9 @@ async def login_user(user: UserLogin):
 
     token_data = {"sub": user.email}
     token = create_access_token(token_data)
-    
-    return {"access_token": token, "token_type": "bearer"}
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user_id": str(existing_user["_id"]),  
+    }
