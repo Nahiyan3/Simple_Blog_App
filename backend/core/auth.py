@@ -2,6 +2,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 
+
 # Use a strong secret key in production, keep it safe!
 SECRET_KEY = "your_super_secret_key"
 ALGORITHM = "HS256"
