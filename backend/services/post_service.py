@@ -1,4 +1,4 @@
-from core.database import post_collection
+from core.database import post_collection, user_collection
 from models.post_model import PostCreate
 from bson import ObjectId
 from datetime import datetime
@@ -9,6 +9,7 @@ def post_helper(post) -> dict:
         "title": post["title"],
         "content": post["content"],
         "author_id": post["author_id"],
+        "author_name": post.get("author_name", "Unknown"),
         "created_at": post["created_at"]
     }
 
@@ -18,3 +19,43 @@ async def create_post(post: PostCreate):
     new_post = await post_collection.insert_one(post_data)
     created_post = await post_collection.find_one({"_id": new_post.inserted_id})
     return post_helper(created_post)
+
+async def all_posts():
+    # Use MongoDB aggregation to join posts with users
+    pipeline = [
+        {
+            "$addFields": {
+                "author_object_id": {"$toObjectId": "$author_id"}
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "author_object_id",
+                "foreignField": "_id",
+                "as": "author_info"
+            }
+        },
+        {
+            "$addFields": {
+                "author_name": {
+                    "$ifNull": [
+                        {"$arrayElemAt": ["$author_info.username", 0]},
+                        "Unknown"
+                    ]
+                }
+            }
+        },
+        {
+            "$project": {
+                "author_info": 0,  # Remove the author_info array from the result
+                "author_object_id": 0  # Remove the temporary author_object_id field
+            }
+        }
+    ]
+    
+    posts_cursor = post_collection.aggregate(pipeline)
+    posts = []
+    async for post in posts_cursor:
+        posts.append(post_helper(post))
+    return posts

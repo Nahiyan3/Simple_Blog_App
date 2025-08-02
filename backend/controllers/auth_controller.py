@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from models.user_model import UserCreate  
 from models.user_model import UserLogin
-from services.auth_service import create_user
+from services.auth_service import create_user, login_user, get_user_by_id
 from core.auth import create_access_token, hash_password, verify_password
 
 
@@ -14,4 +14,13 @@ async def signup(user: UserCreate):
         raise HTTPException(status_code=400, detail=str(e))
 
 async def login(user: UserLogin):
-    return await login_user(user)
+    try:
+        return await login_user(user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+async def get_user(user_id: str):
+    try:
+        return await get_user_by_id(user_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
