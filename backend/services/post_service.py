@@ -21,7 +21,6 @@ async def create_post(post: PostCreate):
     return post_helper(created_post)
 
 async def all_posts():
-    # Use MongoDB aggregation to join posts with users
     pipeline = [
         {
             "$addFields": {
@@ -48,8 +47,8 @@ async def all_posts():
         },
         {
             "$project": {
-                "author_info": 0,  # Remove the author_info array from the result
-                "author_object_id": 0  # Remove the temporary author_object_id field
+                "author_info": 0,  
+                "author_object_id": 0  
             }
         }
     ]

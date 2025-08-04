@@ -9,7 +9,6 @@ from fastapi import HTTPException
 
 
 async def create_user(user: UserCreate):
-    # Check if user exists
     if await user_collection.find_one({"email": user.email}):
         raise Exception("User with this email already exists.")
     
